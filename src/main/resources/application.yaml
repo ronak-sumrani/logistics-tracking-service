@@ -12,9 +12,9 @@ spring:
         format_sql: true
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/postgres
-    username:
-    password:
+    url: jdbc:postgresql://localhost:5432/logistics_db
+    username: postgres
+    password: 1234
     driver-class-name: org.postgresql.Driver
     hikari:
       pool-name: PostgresPool
