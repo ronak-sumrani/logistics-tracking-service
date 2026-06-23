@@ -3,8 +3,6 @@ package com.example.logisticstrackingservice.entity;
 import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
