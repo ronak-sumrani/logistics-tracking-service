@@ -1,5 +1,6 @@
 package com.example.logisticstrackingservice.dto.response;
 
+import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,5 +11,5 @@ import lombok.NoArgsConstructor;
 public class ConsignmentStatusResponse {
     private Long id;
     private String consignmentNumber;
-    private String status;
+    private ConsignmentStatus status;
 }

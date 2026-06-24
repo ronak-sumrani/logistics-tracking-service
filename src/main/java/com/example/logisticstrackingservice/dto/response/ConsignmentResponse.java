@@ -1,5 +1,6 @@
 package com.example.logisticstrackingservice.dto.response;
 
+import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 public class ConsignmentResponse {
     private Long id;
     private String consignmentNumber;
-    private String status;
+    private ConsignmentStatus status;
     private String origin;
     private String destination;
     private String senderName;

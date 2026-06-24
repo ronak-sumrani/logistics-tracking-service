@@ -16,6 +16,7 @@ public class CreateDriverRequest {
     @Size(min = 2, max = 100)
     private String name;
 
+    @NotBlank
     @Pattern(regexp = "^[6-9]\\d{9}$", message = "Invalid mobile number")
     private String mobile;
 }
