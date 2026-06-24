@@ -64,6 +64,6 @@ public class Consignment {
         this.updatedAt = LocalDateTime.now();
     }
 
-    @Column(nullable = false)
-    private boolean isActive;
+    @Column(name = "is_active", nullable = false)
+    private boolean active;
 }

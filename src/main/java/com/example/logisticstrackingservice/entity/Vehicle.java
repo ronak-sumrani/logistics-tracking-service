@@ -23,7 +23,6 @@ public class Vehicle {
     @NotBlank
     private String vehicleType;
 
-    //@CreatedAt
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

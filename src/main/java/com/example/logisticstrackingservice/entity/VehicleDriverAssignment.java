@@ -22,13 +22,13 @@ public class VehicleDriverAssignment {
     @JoinColumn(name = "driver_id", nullable = false)
     private Driver driver;
 
-    @Column(nullable = false)
-    private boolean isActive;
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
     @Column
     private LocalDateTime assignedAt;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime unassignedAt;
 
     @PrePersist
@@ -39,7 +39,8 @@ public class VehicleDriverAssignment {
 
     @PreUpdate
     protected void onUnassign() {
-        this.unassignedAt = LocalDateTime.now();
-        this.assignedAt = null;
+        if (!this.active && this.unassignedAt == null) {
+            this.unassignedAt = LocalDateTime.now();
+        }
     }
 }
