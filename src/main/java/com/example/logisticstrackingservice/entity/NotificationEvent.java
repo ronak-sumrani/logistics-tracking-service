@@ -4,7 +4,6 @@ import com.example.logisticstrackingservice.enums.NotificationChannel;
 import com.example.logisticstrackingservice.enums.NotificationStatus;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -31,7 +30,11 @@ public class NotificationEvent {
     @Column(nullable = false)
     private NotificationStatus status;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

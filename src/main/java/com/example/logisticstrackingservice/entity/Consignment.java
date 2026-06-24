@@ -4,8 +4,6 @@ import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -46,11 +44,26 @@ public class Consignment {
     @JoinColumn(name = "vehicle_id")
     private Vehicle assignedVehicle;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @UpdateTimestamp
     @Column(nullable = false)
     private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
+        if (this.status == null) {
+            this.status = ConsignmentStatus.CREATED;
+        }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    @Column(nullable = false)
+    private boolean isActive;
 }

@@ -4,7 +4,6 @@ import com.example.logisticstrackingservice.enums.AuditAction;
 import jakarta.persistence.*;
 import jakarta.persistence.GenerationType;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -27,7 +26,11 @@ public class AuditLog {
     @Column(nullable = false)
     private String performedBy;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime performedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.performedAt = LocalDateTime.now();
+    }
 }
