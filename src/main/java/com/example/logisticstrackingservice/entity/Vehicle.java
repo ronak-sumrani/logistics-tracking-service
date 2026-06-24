@@ -3,7 +3,6 @@ package com.example.logisticstrackingservice.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -24,7 +23,11 @@ public class Vehicle {
     @NotBlank
     private String vehicleType;
 
-    @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void onCreation() {
+        this.createdAt = LocalDateTime.now();
+    }
 }
