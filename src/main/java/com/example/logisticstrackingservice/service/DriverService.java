@@ -3,6 +3,8 @@ package com.example.logisticstrackingservice.service;
 import com.example.logisticstrackingservice.dto.request.CreateDriverRequest;
 import com.example.logisticstrackingservice.dto.response.DriverResponse;
 import com.example.logisticstrackingservice.entity.Driver;
+import com.example.logisticstrackingservice.exception.DriverAlreadyExistsException;
+import com.example.logisticstrackingservice.exception.DriverNotFoundException;
 import com.example.logisticstrackingservice.mapper.DriverMapper;
 import com.example.logisticstrackingservice.repository.DriverRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +23,7 @@ public class DriverService {
     @Transactional
     public DriverResponse createDriver(CreateDriverRequest request) {
         if (driverRepository.existsByMobile(request.getMobile())) {
-            throw new RuntimeException("Driver already exists with mobile: " + request.getMobile());
+            throw new DriverAlreadyExistsException("Driver already exists with mobile: " + request.getMobile());
         }
         Driver driver = driverMapper.toEntity(request);
         Driver saved = driverRepository.save(driver);
@@ -30,7 +32,7 @@ public class DriverService {
 
     public DriverResponse findById(Long id) {
         Driver driver = driverRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Driver not found for id: " + id));
+                .orElseThrow(() -> new DriverNotFoundException("Driver not found for id: " + id));
         return driverMapper.toResponse(driver);
     }
 }
