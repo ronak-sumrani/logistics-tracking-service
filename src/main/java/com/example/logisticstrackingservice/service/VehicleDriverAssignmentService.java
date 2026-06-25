@@ -5,6 +5,10 @@ import com.example.logisticstrackingservice.dto.response.VehicleDriverAssignment
 import com.example.logisticstrackingservice.entity.Driver;
 import com.example.logisticstrackingservice.entity.Vehicle;
 import com.example.logisticstrackingservice.entity.VehicleDriverAssignment;
+import com.example.logisticstrackingservice.exception.ActiveDriverAssignmentExistsException;
+import com.example.logisticstrackingservice.exception.DriverNotFoundException;
+import com.example.logisticstrackingservice.exception.NoActiveDriverAssignmentException;
+import com.example.logisticstrackingservice.exception.VehicleNotFoundException;
 import com.example.logisticstrackingservice.mapper.VehicleDriverAssignmentMapper;
 import com.example.logisticstrackingservice.repository.DriverRepository;
 import com.example.logisticstrackingservice.repository.VehicleDriverAssignmentRepository;
@@ -31,13 +35,13 @@ public class VehicleDriverAssignmentService {
     @Transactional
     public VehicleDriverAssignmentResponse assignDriverToVehicle(AssignDriverRequest request) {
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
-                .orElseThrow(() -> new RuntimeException("Vehicle not found for id: " + request.getVehicleId()));
+                .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found for id: " + request.getVehicleId()));
 
         Driver driver = driverRepository.findById(request.getDriverId())
-                .orElseThrow(() -> new RuntimeException("Driver not found for id: " + request.getDriverId()));
+                .orElseThrow(() -> new DriverNotFoundException("Driver not found for id: " + request.getDriverId()));
 
         if (vehicleDriverAssignmentRepository.existsByVehicleAndActiveTrue(vehicle)) {
-            throw new RuntimeException("Vehicle already has an active driver assigned");
+            throw new ActiveDriverAssignmentExistsException("Vehicle already has an active driver assigned");
         }
 
         VehicleDriverAssignment assignment = new VehicleDriverAssignment();
@@ -50,11 +54,11 @@ public class VehicleDriverAssignmentService {
     @Transactional
     public void unassignDriver(Long vehicleId) {
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
-                .orElseThrow(() -> new RuntimeException("Vehicle not found for id: " + vehicleId));
+                .orElseThrow(() -> new VehicleNotFoundException("Vehicle not found for id: " + vehicleId));
 
         VehicleDriverAssignment assignment = vehicleDriverAssignmentRepository
                 .findByVehicleAndActiveTrue(vehicle)
-                .orElseThrow(() -> new RuntimeException("No active driver assignment found for vehicle: " + vehicleId));
+                .orElseThrow(() -> new NoActiveDriverAssignmentException("No active driver assignment found for vehicle: " + vehicleId));
 
         assignment.setActive(false);
         vehicleDriverAssignmentRepository.save(assignment);
