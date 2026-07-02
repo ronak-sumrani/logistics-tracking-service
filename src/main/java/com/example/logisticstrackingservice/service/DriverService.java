@@ -7,18 +7,16 @@ import com.example.logisticstrackingservice.exception.DriverAlreadyExistsExcepti
 import com.example.logisticstrackingservice.exception.DriverNotFoundException;
 import com.example.logisticstrackingservice.mapper.DriverMapper;
 import com.example.logisticstrackingservice.repository.DriverRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @Service
 public class DriverService {
 
-    @Autowired
-    private DriverRepository driverRepository;
-
-    @Autowired
-    private DriverMapper driverMapper;
+    private final DriverRepository driverRepository;
+    private final DriverMapper driverMapper;
 
     @Transactional
     public DriverResponse createDriver(CreateDriverRequest request) {

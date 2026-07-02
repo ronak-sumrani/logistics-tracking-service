@@ -4,17 +4,17 @@ import com.example.logisticstrackingservice.dto.request.CreateDriverRequest;
 import com.example.logisticstrackingservice.dto.response.DriverResponse;
 import com.example.logisticstrackingservice.service.DriverService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/drivers")
 public class DriverController {
 
-    @Autowired
-    private DriverService driverService;
+    private final DriverService driverService;
 
     @PostMapping
     public ResponseEntity<DriverResponse> createDriver(@Valid @RequestBody CreateDriverRequest request) {

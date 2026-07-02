@@ -4,17 +4,15 @@ import com.example.logisticstrackingservice.dto.response.CustomerResponse;
 import com.example.logisticstrackingservice.entity.Customer;
 import com.example.logisticstrackingservice.mapper.CustomerMapper;
 import com.example.logisticstrackingservice.repository.CustomerRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+@RequiredArgsConstructor
 @Service
 public class CustomerService {
 
-    @Autowired
-    private CustomerRepository customerRepository;
-
-    @Autowired
-    private CustomerMapper customerMapper;
+    private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
 
     public Customer findOrCreate(String name, String mobile) {
         return customerRepository.findByMobile(mobile)
