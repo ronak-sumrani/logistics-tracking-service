@@ -7,22 +7,20 @@ import com.example.logisticstrackingservice.dto.response.VehicleResponse;
 import com.example.logisticstrackingservice.service.VehicleDriverAssignmentService;
 import com.example.logisticstrackingservice.service.VehicleService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/vehicles")
 public class VehicleController {
 
-    @Autowired
-    private VehicleService vehicleService;
-
-    @Autowired
-    private VehicleDriverAssignmentService vehicleDriverAssignmentService;
+    private final VehicleService vehicleService;
+    private final VehicleDriverAssignmentService vehicleDriverAssignmentService;
 
     @PostMapping
     public ResponseEntity<VehicleResponse> createVehicle(@Valid @RequestBody CreateVehicleRequest request) {

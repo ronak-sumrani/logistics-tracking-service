@@ -13,24 +13,18 @@ import com.example.logisticstrackingservice.mapper.VehicleDriverAssignmentMapper
 import com.example.logisticstrackingservice.repository.DriverRepository;
 import com.example.logisticstrackingservice.repository.VehicleDriverAssignmentRepository;
 import com.example.logisticstrackingservice.repository.VehicleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@RequiredArgsConstructor
 @Service
 public class VehicleDriverAssignmentService {
 
-    @Autowired
-    private VehicleDriverAssignmentRepository vehicleDriverAssignmentRepository;
-
-    @Autowired
-    private VehicleRepository vehicleRepository;
-
-    @Autowired
-    private DriverRepository driverRepository;
-
-    @Autowired
-    private VehicleDriverAssignmentMapper vehicleDriverAssignmentMapper;
+    private final VehicleDriverAssignmentRepository vehicleDriverAssignmentRepository;
+    private final VehicleRepository vehicleRepository;
+    private final DriverRepository driverRepository;
+    private final VehicleDriverAssignmentMapper vehicleDriverAssignmentMapper;
 
     @Transactional
     public VehicleDriverAssignmentResponse assignDriverToVehicle(AssignDriverRequest request) {
@@ -39,6 +33,14 @@ public class VehicleDriverAssignmentService {
 
         Driver driver = driverRepository.findById(request.getDriverId())
                 .orElseThrow(() -> new DriverNotFoundException("Driver not found for id: " + request.getDriverId()));
+
+        if (vehicleDriverAssignmentRepository.existsByDriverAndActiveTrue(driver)) {
+            throw new ActiveDriverAssignmentExistsException("Driver is already actively assigned to another vehicle");
+        }
+
+        if (vehicleDriverAssignmentRepository.existsByVehicleAndDriverAndActiveTrue(vehicle, driver)) {
+            throw new ActiveDriverAssignmentExistsException("Driver is already assigned to this vehicle");
+        }
 
         if (vehicleDriverAssignmentRepository.existsByVehicleAndActiveTrue(vehicle)) {
             throw new ActiveDriverAssignmentExistsException("Vehicle already has an active driver assigned");

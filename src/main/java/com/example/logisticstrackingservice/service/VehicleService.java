@@ -7,20 +7,19 @@ import com.example.logisticstrackingservice.exception.VehicleAlreadyExistsExcept
 import com.example.logisticstrackingservice.exception.VehicleNotFoundException;
 import com.example.logisticstrackingservice.mapper.VehicleMapper;
 import com.example.logisticstrackingservice.repository.VehicleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class VehicleService {
-    @Autowired
-    private VehicleRepository vehicleRepository;
 
-    @Autowired
-    private VehicleMapper  vehicleMapper;
+    private final  VehicleRepository vehicleRepository;
+    private final VehicleMapper  vehicleMapper;
 
     public VehicleResponse findById(Long id) {
         Vehicle vehicle = vehicleRepository.findById(id).

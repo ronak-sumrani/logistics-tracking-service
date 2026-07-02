@@ -6,21 +6,19 @@ import com.example.logisticstrackingservice.entity.ShipmentHistory;
 import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import com.example.logisticstrackingservice.mapper.ShipmentHistoryMapper;
 import com.example.logisticstrackingservice.repository.ShipmentHistoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class ShipmentHistoryService {
 
-    @Autowired
-    private ShipmentHistoryRepository shipmentHistoryRepository;
-
-    @Autowired
-    private ShipmentHistoryMapper shipmentHistoryMapper;
+    private final ShipmentHistoryRepository shipmentHistoryRepository;
+    private final ShipmentHistoryMapper shipmentHistoryMapper;
 
     @Transactional
     public void recordStatusChange(Consignment consignment, ConsignmentStatus oldStatus, ConsignmentStatus newStatus, String remarks) {

@@ -20,11 +20,11 @@ public class Consignment {
     @NotBlank
     private String consignmentNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "sender_id")
     private Customer sender;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "receiver_id")
     private Customer receiver;
 
@@ -40,7 +40,7 @@ public class Consignment {
     @Column(nullable = false)
     private ConsignmentStatus status;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id")
     private Vehicle assignedVehicle;
 

@@ -1,5 +1,6 @@
 package com.example.logisticstrackingservice.service;
 
+import com.example.logisticstrackingservice.annotation.Auditable;
 import com.example.logisticstrackingservice.dto.request.AssignVehicleRequest;
 import com.example.logisticstrackingservice.dto.request.CreateConsignmentRequest;
 import com.example.logisticstrackingservice.dto.request.UpdateShipmentStatusRequest;
@@ -8,41 +9,31 @@ import com.example.logisticstrackingservice.dto.response.ConsignmentStatusRespon
 import com.example.logisticstrackingservice.entity.Consignment;
 import com.example.logisticstrackingservice.entity.Customer;
 import com.example.logisticstrackingservice.entity.Vehicle;
+import com.example.logisticstrackingservice.enums.AuditAction;
 import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import com.example.logisticstrackingservice.exception.*;
 import com.example.logisticstrackingservice.mapper.ConsignmentMapper;
 import com.example.logisticstrackingservice.repository.ConsignmentRepository;
 import com.example.logisticstrackingservice.repository.VehicleDriverAssignmentRepository;
 import com.example.logisticstrackingservice.repository.VehicleRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-
+@RequiredArgsConstructor
 @Service
 public class ConsignmentService {
 
-    @Autowired
-    private ConsignmentRepository consignmentRepository;
-
-    @Autowired
-    private ConsignmentMapper consignmentMapper;
-
-    @Autowired
-    private CustomerService customerService;
-
-    @Autowired
-    private ShipmentHistoryService shipmentHistoryService;
-
-    @Autowired
-    private VehicleRepository vehicleRepository;
-
-    @Autowired
-    private VehicleDriverAssignmentRepository vehicleDriverAssignmentRepository;
+    private final ConsignmentRepository consignmentRepository;
+    private final ConsignmentMapper consignmentMapper;
+    private final CustomerService customerService;
+    private final ShipmentHistoryService shipmentHistoryService;
+    private final VehicleRepository vehicleRepository;
+    private final VehicleDriverAssignmentRepository vehicleDriverAssignmentRepository;
 
     public ConsignmentResponse getConsignmentById(Long id) {
         Consignment consignment = consignmentRepository.findById(id).
@@ -59,6 +50,7 @@ public class ConsignmentService {
         return consignmentResponses;
     }
 
+    @Auditable(action = AuditAction.SHIPMENT_CREATED)
     @Transactional
     public ConsignmentResponse createConsignment(CreateConsignmentRequest request) {
         Customer sender = customerService.findOrCreate(request.getSenderName(), request.getSenderMobile());
@@ -68,7 +60,9 @@ public class ConsignmentService {
         Consignment saved = consignmentRepository.save(consignment);
         return consignmentMapper.toResponse(saved);
     }
+    // idempotency handling, outbox pattern
 
+    @Auditable(action = AuditAction.STATUS_UPDATED)
     @Transactional
     public ConsignmentResponse updateShipmentStatus(UpdateShipmentStatusRequest request) {
         Consignment consignment = consignmentRepository.findByConsignmentNumber(request.getConsignmentNumber())
@@ -96,6 +90,7 @@ public class ConsignmentService {
         consignmentRepository.save(consignment);
     }
 
+    @Auditable(action = AuditAction.VEHICLE_ASSIGNED)
     @Transactional
     public ConsignmentResponse assignVehicle(AssignVehicleRequest request) {
         Consignment consignment = consignmentRepository.findById(request.getConsignmentId())

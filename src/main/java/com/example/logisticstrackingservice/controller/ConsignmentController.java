@@ -9,22 +9,20 @@ import com.example.logisticstrackingservice.dto.response.ConsignmentStatusRespon
 import com.example.logisticstrackingservice.service.ConsignmentService;
 import com.example.logisticstrackingservice.service.ShipmentHistoryService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/consignments")
 public class ConsignmentController {
 
-    @Autowired
-    private ConsignmentService consignmentService;
-
-    @Autowired
-    private ShipmentHistoryService shipmentHistoryService;
+    private final ConsignmentService consignmentService;
+    private final ShipmentHistoryService shipmentHistoryService;
 
     @PostMapping
     public ResponseEntity<ConsignmentResponse> createConsignment(@Valid @RequestBody CreateConsignmentRequest request) {
@@ -44,14 +42,14 @@ public class ConsignmentController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/assign-vehicle")
-    public ResponseEntity<ConsignmentResponse> assignVehicle(@PathVariable Long id, @Valid @RequestBody AssignVehicleRequest request) {
+    @PutMapping("/assign-vehicle")
+    public ResponseEntity<ConsignmentResponse> assignVehicle(@Valid @RequestBody AssignVehicleRequest request) {
         ConsignmentResponse response = consignmentService.assignVehicle(request);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{id}/status")
-    public ResponseEntity<ConsignmentResponse> updateStatus(@PathVariable Long id, @Valid @RequestBody UpdateShipmentStatusRequest request) {
+    @PutMapping("/status-update")
+    public ResponseEntity<ConsignmentResponse> updateStatus(@Valid @RequestBody UpdateShipmentStatusRequest request) {
         ConsignmentResponse response = consignmentService.updateShipmentStatus(request);
         return ResponseEntity.ok(response);
     }
@@ -65,5 +63,10 @@ public class ConsignmentController {
     @GetMapping("/{id}/history")
     public ResponseEntity<List<ShipmentHistoryResponse>> getShipmentHistory(@PathVariable Long id) {
         return ResponseEntity.ok(shipmentHistoryService.getHistoryByConsignmentId(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ConsignmentResponse>> getAllConsignments() {
+        return ResponseEntity.ok(consignmentService.getAllConsignments());
     }
 }
