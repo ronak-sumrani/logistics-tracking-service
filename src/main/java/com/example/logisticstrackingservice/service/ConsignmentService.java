@@ -60,7 +60,7 @@ public class ConsignmentService {
         Consignment saved = consignmentRepository.save(consignment);
         return consignmentMapper.toResponse(saved);
     }
-    // idopotency handling, outbox pattern
+    // idempotency handling, outbox pattern
 
     @Auditable(action = AuditAction.STATUS_UPDATED)
     @Transactional
