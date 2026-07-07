@@ -1,5 +1,6 @@
 package com.example.logisticstrackingservice.entity;
 
+import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import com.example.logisticstrackingservice.enums.NotificationChannel;
 import com.example.logisticstrackingservice.enums.NotificationStatus;
 import jakarta.persistence.*;
@@ -8,9 +9,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "notification_events")
+@Table(name = "notification_history")
 @Data
-public class NotificationEvent {
+public class NotificationHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +29,11 @@ public class NotificationEvent {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private NotificationStatus status;
+    private ConsignmentStatus consignmentStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private NotificationStatus notificationStatus;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -38,3 +43,6 @@ public class NotificationEvent {
         this.createdAt = LocalDateTime.now();
     }
 }
+
+
+// notification log entity

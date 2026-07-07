@@ -65,5 +65,5 @@ public class Consignment {
     }
 
     @Column(name = "is_active", nullable = false)
-    private boolean active;
+    private boolean active = true;
 }
