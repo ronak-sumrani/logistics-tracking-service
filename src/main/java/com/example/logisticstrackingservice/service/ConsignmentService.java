@@ -12,14 +12,16 @@ import com.example.logisticstrackingservice.entity.Vehicle;
 import com.example.logisticstrackingservice.enums.AuditAction;
 import com.example.logisticstrackingservice.enums.ConsignmentStatus;
 import com.example.logisticstrackingservice.exception.*;
+import com.example.logisticstrackingservice.kafka.event.ShipmentStatusChangedEvent;
 import com.example.logisticstrackingservice.mapper.ConsignmentMapper;
+import com.example.logisticstrackingservice.mapper.ShipmentEventMapper;
 import com.example.logisticstrackingservice.repository.ConsignmentRepository;
 import com.example.logisticstrackingservice.repository.VehicleDriverAssignmentRepository;
 import com.example.logisticstrackingservice.repository.VehicleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -31,9 +33,10 @@ public class ConsignmentService {
     private final ConsignmentRepository consignmentRepository;
     private final ConsignmentMapper consignmentMapper;
     private final CustomerService customerService;
-    private final ShipmentHistoryService shipmentHistoryService;
     private final VehicleRepository vehicleRepository;
     private final VehicleDriverAssignmentRepository vehicleDriverAssignmentRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
+    private final ShipmentEventMapper shipmentEventMapper;
 
     public ConsignmentResponse getConsignmentById(Long id) {
         Consignment consignment = consignmentRepository.findById(id).
@@ -62,13 +65,13 @@ public class ConsignmentService {
     }
     // idempotency handling, outbox pattern
 
-    @Auditable(action = AuditAction.STATUS_UPDATED)
+//    @Auditable(action = AuditAction.STATUS_UPDATED)
     @Transactional
-    public ConsignmentResponse updateShipmentStatus(UpdateShipmentStatusRequest request) {
-        Consignment consignment = consignmentRepository.findByConsignmentNumber(request.getConsignmentNumber())
-                .orElseThrow(() -> new ConsignmentNotFoundException("Consignment not found for number: " + request.getConsignmentNumber()));
+    public ConsignmentResponse updateShipmentStatus(Long consignmentId, UpdateShipmentStatusRequest request) {
+        Consignment consignment = consignmentRepository.findById(consignmentId)
+                .orElseThrow(() -> new ConsignmentNotFoundException("Consignment not found for id: " + consignmentId));
         if (consignment.getAssignedVehicle() == null) {
-            throw new VehicleNotAssignedException("Cannot update status - no vehicle assigned to consignment: " + request.getConsignmentNumber());
+            throw new VehicleNotAssignedException("Cannot update status - no vehicle assigned to consignment: " + consignment.getConsignmentNumber());
         }
         ConsignmentStatus oldStatus = consignment.getStatus();
         if (!oldStatus.canTransitionTo(request.getNewStatus())) {
@@ -76,9 +79,11 @@ public class ConsignmentService {
                     "Cannot transition from " + oldStatus + " to " + request.getNewStatus()
             );
         }
-        shipmentHistoryService.recordStatusChange(consignment, oldStatus, request.getNewStatus(), request.getRemarks());
         consignment.setStatus(request.getNewStatus());
         consignmentRepository.save(consignment);
+
+        ShipmentStatusChangedEvent event = shipmentEventMapper.toEvent(consignment, oldStatus, request.getNewStatus(), request.getRemarks());
+        applicationEventPublisher.publishEvent(event);
         return consignmentMapper.toResponse(consignment);
     }
 
@@ -92,10 +97,9 @@ public class ConsignmentService {
 
     @Auditable(action = AuditAction.VEHICLE_ASSIGNED)
     @Transactional
-    public ConsignmentResponse assignVehicle(AssignVehicleRequest request) {
-        Consignment consignment = consignmentRepository.findById(request.getConsignmentId())
-                .orElseThrow(() -> new ConsignmentNotFoundException("Consignment not found for id: " + request.getConsignmentId()));
-
+    public ConsignmentResponse assignVehicle(Long consignmentId, AssignVehicleRequest request) {
+        Consignment consignment = consignmentRepository.findById(consignmentId)
+                .orElseThrow(() -> new ConsignmentNotFoundException("Consignment not found for id: " + consignmentId));
         if (consignment.getAssignedVehicle() != null) {
             throw new RuntimeException("Consignment already has a vehicle assigned");
         }

@@ -42,15 +42,19 @@ public class ConsignmentController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/assign-vehicle")
-    public ResponseEntity<ConsignmentResponse> assignVehicle(@Valid @RequestBody AssignVehicleRequest request) {
-        ConsignmentResponse response = consignmentService.assignVehicle(request);
+    @PutMapping("/{id}/assign-vehicle")
+    public ResponseEntity<ConsignmentResponse> assignVehicle(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignVehicleRequest request) {
+        ConsignmentResponse response = consignmentService.assignVehicle(id, request);
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/status-update")
-    public ResponseEntity<ConsignmentResponse> updateStatus(@Valid @RequestBody UpdateShipmentStatusRequest request) {
-        ConsignmentResponse response = consignmentService.updateShipmentStatus(request);
+    @PutMapping("/{id}/status")
+    public ResponseEntity<ConsignmentResponse> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateShipmentStatusRequest request) {
+        ConsignmentResponse response = consignmentService.updateShipmentStatus(id, request);
         return ResponseEntity.ok(response);
     }
 
