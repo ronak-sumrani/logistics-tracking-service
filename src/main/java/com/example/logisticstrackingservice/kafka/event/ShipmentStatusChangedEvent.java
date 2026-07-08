@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ShipmentStatusChangedEvent {
+    private String eventId;
     private Long consignmentId;
     private String consignmentNumber;
     private ConsignmentStatus oldStatus;

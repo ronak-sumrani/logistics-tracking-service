@@ -10,13 +10,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificationHistoryMapper {
 
-    public NotificationHistory toEntity(NotificationDto dto, Consignment consignment, ConsignmentStatus consignmentStatus) {
+    public NotificationHistory toEntity(NotificationDto dto, Consignment consignment,
+                                        ConsignmentStatus consignmentStatus, String eventId) {
         NotificationHistory history = new NotificationHistory();
         history.setConsignment(consignment);
         history.setChannel(dto.getChannel());
         history.setMessage(dto.getMessage());
         history.setConsignmentStatus(consignmentStatus);
         history.setNotificationStatus(NotificationStatus.SENT);
+        history.setEventId(eventId);
         return history;
     }
 }

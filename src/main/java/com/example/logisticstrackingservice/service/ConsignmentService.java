@@ -8,6 +8,7 @@ import com.example.logisticstrackingservice.dto.response.ConsignmentResponse;
 import com.example.logisticstrackingservice.dto.response.ConsignmentStatusResponse;
 import com.example.logisticstrackingservice.entity.Consignment;
 import com.example.logisticstrackingservice.entity.Customer;
+import com.example.logisticstrackingservice.entity.OutboxEvent;
 import com.example.logisticstrackingservice.entity.Vehicle;
 import com.example.logisticstrackingservice.enums.AuditAction;
 import com.example.logisticstrackingservice.enums.ConsignmentStatus;
@@ -16,10 +17,12 @@ import com.example.logisticstrackingservice.kafka.event.ShipmentStatusChangedEve
 import com.example.logisticstrackingservice.mapper.ConsignmentMapper;
 import com.example.logisticstrackingservice.mapper.ShipmentEventMapper;
 import com.example.logisticstrackingservice.repository.ConsignmentRepository;
+import com.example.logisticstrackingservice.repository.OutboxEventRepository;
 import com.example.logisticstrackingservice.repository.VehicleDriverAssignmentRepository;
 import com.example.logisticstrackingservice.repository.VehicleRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -35,8 +38,9 @@ public class ConsignmentService {
     private final CustomerService customerService;
     private final VehicleRepository vehicleRepository;
     private final VehicleDriverAssignmentRepository vehicleDriverAssignmentRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
     private final ShipmentEventMapper shipmentEventMapper;
+    private final ObjectMapper objectMapper;
+    private final OutboxEventRepository outboxEventRepository;
 
     public ConsignmentResponse getConsignmentById(Long id) {
         Consignment consignment = consignmentRepository.findById(id).
@@ -63,9 +67,7 @@ public class ConsignmentService {
         Consignment saved = consignmentRepository.save(consignment);
         return consignmentMapper.toResponse(saved);
     }
-    // idempotency handling, outbox pattern
 
-//    @Auditable(action = AuditAction.STATUS_UPDATED)
     @Transactional
     public ConsignmentResponse updateShipmentStatus(Long consignmentId, UpdateShipmentStatusRequest request) {
         Consignment consignment = consignmentRepository.findById(consignmentId)
@@ -83,7 +85,17 @@ public class ConsignmentService {
         consignmentRepository.save(consignment);
 
         ShipmentStatusChangedEvent event = shipmentEventMapper.toEvent(consignment, oldStatus, request.getNewStatus(), request.getRemarks());
-        applicationEventPublisher.publishEvent(event);
+
+        OutboxEvent outboxEvent = new OutboxEvent();
+        outboxEvent.setEventId(event.getEventId());
+        outboxEvent.setTopic("shipment-status-events");
+        outboxEvent.setAggregateKey(event.getConsignmentNumber());
+        try {
+            outboxEvent.setPayload(objectMapper.writeValueAsString(event));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("Failed to serialize event", e);
+        }
+        outboxEventRepository.save(outboxEvent);
         return consignmentMapper.toResponse(consignment);
     }
 
@@ -113,7 +125,6 @@ public class ConsignmentService {
         consignmentRepository.save(consignment);
         return consignmentMapper.toResponse(consignment);
     }
-    // what if vehicle is already assigned? give error or re-assign?
 
     public ConsignmentStatusResponse getTrackingInfo(String consignmentNumber) {
         Consignment consignment = consignmentRepository.findByConsignmentNumber(consignmentNumber)

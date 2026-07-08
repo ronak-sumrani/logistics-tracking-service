@@ -23,6 +23,12 @@ public class NotificationConsumer {
 
     @KafkaListener(topics = "shipment-status-events", groupId = "notification-service")
     public void consume(ShipmentStatusChangedEvent event) {
+        if (notificationHistoryRepository.existsByEventId(event.getEventId())) {
+            log.warn("[notification-consumer] duplicate event {} for {}, skipping",
+                    event.getEventId(), event.getConsignmentNumber());
+            return;
+        }
+
         Consignment consignment = consignmentRepository.findById(event.getConsignmentId())
                 .orElse(null);
         if (consignment == null) {
@@ -30,6 +36,7 @@ public class NotificationConsumer {
                     event.getConsignmentId());
             return;
         }
+
         NotificationDto notification = NotificationDto.builder()
                 .consignmentNumber(event.getConsignmentNumber())
                 .channel(NotificationChannel.SMS)
@@ -41,7 +48,7 @@ public class NotificationConsumer {
         log.info("[notification-consumer] SIMULATED SEND -> {}", notification);
 
         notificationHistoryRepository.save(
-                notificationHistoryMapper.toEntity(notification, consignment, event.getNewStatus())
+                notificationHistoryMapper.toEntity(notification, consignment, event.getNewStatus(), event.getEventId())
         );
     }
 }

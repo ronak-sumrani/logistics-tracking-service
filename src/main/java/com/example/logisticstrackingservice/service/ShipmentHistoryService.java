@@ -21,12 +21,13 @@ public class ShipmentHistoryService {
     private final ShipmentHistoryMapper shipmentHistoryMapper;
 
     @Transactional
-    public void recordStatusChange(Consignment consignment, ConsignmentStatus oldStatus, ConsignmentStatus newStatus, String remarks) {
+    public void recordStatusChange(Consignment consignment, ConsignmentStatus oldStatus, ConsignmentStatus newStatus, String remarks, String eventId) {
         ShipmentHistory shipmentHistory = new ShipmentHistory();
         shipmentHistory.setConsignment(consignment);
         shipmentHistory.setOldStatus(oldStatus);
         shipmentHistory.setNewStatus(newStatus);
         shipmentHistory.setRemarks(remarks);
+        shipmentHistory.setEventId(eventId);
         shipmentHistoryRepository.save(shipmentHistory);
     }
 
