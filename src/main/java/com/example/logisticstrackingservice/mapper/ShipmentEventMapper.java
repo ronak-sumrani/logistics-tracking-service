@@ -6,6 +6,7 @@ import com.example.logisticstrackingservice.kafka.event.ShipmentStatusChangedEve
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Component
 public class ShipmentEventMapper {
@@ -13,6 +14,7 @@ public class ShipmentEventMapper {
     public ShipmentStatusChangedEvent toEvent(Consignment consignment, ConsignmentStatus oldStatus,
                                               ConsignmentStatus newStatus, String remarks) {
         return ShipmentStatusChangedEvent.builder()
+                .eventId(UUID.randomUUID().toString())
                 .consignmentId(consignment.getId())
                 .consignmentNumber(consignment.getConsignmentNumber())
                 .oldStatus(oldStatus)

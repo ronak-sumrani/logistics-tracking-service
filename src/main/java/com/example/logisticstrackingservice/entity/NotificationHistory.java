@@ -35,6 +35,9 @@ public class NotificationHistory {
     @Column(nullable = false)
     private NotificationStatus notificationStatus;
 
+    @Column(name = "event_id", unique = true)
+    private String eventId;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 

@@ -23,6 +23,9 @@ public class AuditLog {
     @Column(nullable = false)
     private AuditAction action;
 
+    @Column(name = "event_id", unique = true)
+    private String eventId;
+
     @Column(nullable = false)
     private String performedBy;
 

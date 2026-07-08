@@ -31,6 +31,9 @@ public class ShipmentHistory {
 
     private String remarks;
 
+    @Column(name = "event_id", unique = true)
+    private String eventId;
+
     @Column(nullable = false)
     private LocalDateTime changedAt;
 

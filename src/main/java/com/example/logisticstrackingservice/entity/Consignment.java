@@ -41,7 +41,7 @@ public class Consignment {
     private ConsignmentStatus status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "vehicle_id")
+    @JoinColumn(name = "vehicle_id", unique = true)
     private Vehicle assignedVehicle;
 
     @Column(nullable = false, updatable = false)

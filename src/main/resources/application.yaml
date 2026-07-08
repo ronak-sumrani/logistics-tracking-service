@@ -25,6 +25,8 @@ spring:
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
       properties:
         spring.json.trusted.packages: "com.example.logisticstrackingservice.kafka.event"
+        spring.json.value.default.type: "com.example.logisticstrackingservice.kafka.event.ShipmentStatusChangedEvent"
+        spring.json.use.type.headers: false
 
   datasource:
     url: jdbc:postgresql://localhost:5432/logistics_db

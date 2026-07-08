@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface ShipmentHistoryRepository extends JpaRepository<ShipmentHistory, Long> {
     List<ShipmentHistory> findByConsignmentIdOrderByChangedAtAsc(Long consignmentId);
+    boolean existsByEventId(String eventId);
 }
