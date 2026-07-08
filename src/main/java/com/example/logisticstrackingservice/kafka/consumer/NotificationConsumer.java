@@ -23,12 +23,15 @@ public class NotificationConsumer {
 
     @KafkaListener(topics = "shipment-status-events", groupId = "notification-service")
     public void consume(ShipmentStatusChangedEvent event) {
+        if (event.getEventId() == null || event.getEventId().isBlank()) {
+            log.error("[notification-consumer] received event without eventId for {}, skipping", event.getConsignmentNumber());
+            return;
+        }
         if (notificationHistoryRepository.existsByEventId(event.getEventId())) {
             log.warn("[notification-consumer] duplicate event {} for {}, skipping",
                     event.getEventId(), event.getConsignmentNumber());
             return;
         }
-
         Consignment consignment = consignmentRepository.findById(event.getConsignmentId())
                 .orElse(null);
         if (consignment == null) {
