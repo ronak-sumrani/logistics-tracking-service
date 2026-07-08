@@ -22,11 +22,14 @@ public class AuditConsumer {
 
     @KafkaListener(topics = "shipment-status-events", groupId = "audit-service")
     public void consume(ShipmentStatusChangedEvent event) {
-        if(auditLogRepository.existsByEventId(event.getEventId())) {
+        if (event.getEventId() == null || event.getEventId().isBlank()) {
+            log.error("[audit-consumer] received event without eventId for {}, skipping", event.getConsignmentNumber());
+            return;
+        }
+        if (auditLogRepository.existsByEventId(event.getEventId())) {
             log.warn("[audit-consumer] duplicate event {} for {}, skipping", event.getEventId(), event.getConsignmentNumber());
             return;
         }
-
         log.info("[audit-consumer] logging STATUS_UPDATED for {}", event.getConsignmentNumber());
 
         Consignment consignment = consignmentRepository.findById(event.getConsignmentId())
