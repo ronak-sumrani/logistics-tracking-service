@@ -21,11 +21,14 @@ public class ShipmentHistoryConsumer {
 
     @KafkaListener(topics = "shipment-status-events", groupId = "shipment-history-service")
     public void consume(ShipmentStatusChangedEvent event) {
+        if (event.getEventId() == null || event.getEventId().isBlank()) {
+            log.error("[history-consumer] received event without eventId for {}, skipping", event.getConsignmentNumber());
+            return;
+        }
         if (shipmentHistoryRepository.existsByEventId(event.getEventId())) {
             log.warn("[history-consumer] duplicate event {} for {}, skipping", event.getEventId(), event.getConsignmentNumber());
             return;
         }
-
         log.info("[history-consumer] processing status change for {}", event.getConsignmentNumber());
 
         Consignment consignment = consignmentRepository.findById(event.getConsignmentId())
