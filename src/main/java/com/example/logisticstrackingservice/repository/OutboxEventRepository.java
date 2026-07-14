@@ -12,4 +12,5 @@ public interface OutboxEventRepository extends JpaRepository<OutboxEvent, Long> 
     List<OutboxEvent> findTop50ByPublishedFalseOrderByCreatedAtAsc();
     // Top50 is the batch size — each scheduled run processes at most 50 unpublished rows, oldest first.
     // If you have fewer than 50 waiting, you just get however many exist.
+    Boolean existsByEventId(String eventId);
 }
