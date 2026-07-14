@@ -9,6 +9,7 @@ import com.example.logisticstrackingservice.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -21,13 +22,15 @@ public class AuditConsumer {
     private final AuditLogRepository auditLogRepository;
 
     @KafkaListener(topics = "shipment-status-events", groupId = "audit-service")
-    public void consume(ShipmentStatusChangedEvent event) {
+    public void consume(ShipmentStatusChangedEvent event, Acknowledgment acknowledgment) {
         if (event.getEventId() == null || event.getEventId().isBlank()) {
             log.error("[audit-consumer] received event without eventId for {}, skipping", event.getConsignmentNumber());
+            acknowledgment.acknowledge();
             return;
         }
         if (auditLogRepository.existsByEventId(event.getEventId())) {
             log.warn("[audit-consumer] duplicate event {} for {}, skipping", event.getEventId(), event.getConsignmentNumber());
+            acknowledgment.acknowledge();
             return;
         }
         log.info("[audit-consumer] logging STATUS_UPDATED for {}", event.getConsignmentNumber());
@@ -36,8 +39,10 @@ public class AuditConsumer {
                 .orElse(null);
         if (consignment == null) {
             log.warn("[audit-consumer] consignment {} not found, skipping audit log", event.getConsignmentId());
+            acknowledgment.acknowledge();
             return;
         }
         auditLogService.log(consignment, AuditAction.STATUS_UPDATED, event.getEventId());
+        acknowledgment.acknowledge();
     }
 }
