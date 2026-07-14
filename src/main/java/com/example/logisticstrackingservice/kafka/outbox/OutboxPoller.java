@@ -9,7 +9,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -18,10 +17,11 @@ import java.util.List;
 public class OutboxPoller {
 
     private final OutboxEventRepository outboxEventRepository;
+    private final OutboxEventProcessor outboxEventProcessor;
     private final KafkaTemplate<String, String> stringKafkaTemplate;
 
-    @Scheduled(fixedDelay = 2000)
     @Transactional
+    @Scheduled(fixedDelay = 2000)
     public void publishPendingEvents() {
         List<OutboxEvent> pending = outboxEventRepository.findTop50ByPublishedFalseOrderByCreatedAtAsc();
 
@@ -32,18 +32,13 @@ public class OutboxPoller {
         log.info("[outbox-poller] found {} pending event(s) to publish", pending.size());
 
         for (OutboxEvent outboxEvent : pending) {
-            try {
-                stringKafkaTemplate.send(outboxEvent.getTopic(), outboxEvent.getAggregateKey(), outboxEvent.getPayload())
-                        .get();
-
-                outboxEvent.setPublished(true);
-                outboxEvent.setPublishedAt(LocalDateTime.now());
-                outboxEventRepository.save(outboxEvent);
-
-                log.info("[outbox-poller] published event {} for {}", outboxEvent.getEventId(), outboxEvent.getAggregateKey());
+            try{
+                if(!outboxEventRepository.existsByEventId(outboxEvent.getEventId())) {
+                    stringKafkaTemplate.send(outboxEvent.getTopic(), outboxEvent.getAggregateKey(), outboxEvent.getPayload());
+                    outboxEventProcessor.processOutboxEvent(outboxEvent);
+                }
             } catch (Exception e) {
-                log.error("[outbox-poller] failed to publish event {}, will retry next cycle: {}",
-                        outboxEvent.getEventId(), e.getMessage());
+                log.error("[outbox-poller] failed to publish event {}, will retry next cycle: {}", outboxEvent.getEventId(), e.getMessage());
             }
         }
     }
