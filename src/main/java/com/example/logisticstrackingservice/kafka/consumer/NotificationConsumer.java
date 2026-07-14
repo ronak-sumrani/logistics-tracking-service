@@ -10,6 +10,7 @@ import com.example.logisticstrackingservice.repository.NotificationHistoryReposi
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -22,14 +23,16 @@ public class NotificationConsumer {
     private final NotificationHistoryMapper notificationHistoryMapper;
 
     @KafkaListener(topics = "shipment-status-events", groupId = "notification-service")
-    public void consume(ShipmentStatusChangedEvent event) {
+    public void consume(ShipmentStatusChangedEvent event, Acknowledgment acknowledgment) {
         if (event.getEventId() == null || event.getEventId().isBlank()) {
             log.error("[notification-consumer] received event without eventId for {}, skipping", event.getConsignmentNumber());
+            acknowledgment.acknowledge();
             return;
         }
         if (notificationHistoryRepository.existsByEventId(event.getEventId())) {
             log.warn("[notification-consumer] duplicate event {} for {}, skipping",
                     event.getEventId(), event.getConsignmentNumber());
+            acknowledgment.acknowledge();
             return;
         }
         Consignment consignment = consignmentRepository.findById(event.getConsignmentId())
@@ -37,6 +40,7 @@ public class NotificationConsumer {
         if (consignment == null) {
             log.warn("[notification-consumer] consignment {} not found, skipping notification",
                     event.getConsignmentId());
+            acknowledgment.acknowledge();
             return;
         }
 
@@ -53,5 +57,6 @@ public class NotificationConsumer {
         notificationHistoryRepository.save(
                 notificationHistoryMapper.toEntity(notification, consignment, event.getNewStatus(), event.getEventId())
         );
+        acknowledgment.acknowledge();
     }
 }

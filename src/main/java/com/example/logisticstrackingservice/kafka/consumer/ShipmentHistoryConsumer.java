@@ -8,6 +8,7 @@ import com.example.logisticstrackingservice.service.ShipmentHistoryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -20,13 +21,15 @@ public class ShipmentHistoryConsumer {
     private final ShipmentHistoryService shipmentHistoryService;
 
     @KafkaListener(topics = "shipment-status-events", groupId = "shipment-history-service")
-    public void consume(ShipmentStatusChangedEvent event) {
+    public void consume(ShipmentStatusChangedEvent event, Acknowledgment acknowledgment) {
         if (event.getEventId() == null || event.getEventId().isBlank()) {
             log.error("[history-consumer] received event without eventId for {}, skipping", event.getConsignmentNumber());
+            acknowledgment.acknowledge();
             return;
         }
         if (shipmentHistoryRepository.existsByEventId(event.getEventId())) {
             log.warn("[history-consumer] duplicate event {} for {}, skipping", event.getEventId(), event.getConsignmentNumber());
+            acknowledgment.acknowledge();
             return;
         }
         log.info("[history-consumer] processing status change for {}", event.getConsignmentNumber());
@@ -35,6 +38,7 @@ public class ShipmentHistoryConsumer {
                 .orElse(null);
         if (consignment == null) {
             log.warn("[history-consumer] consignment {} not found, skipping history record", event.getConsignmentId());
+            acknowledgment.acknowledge();
             return;
         }
 
@@ -45,5 +49,6 @@ public class ShipmentHistoryConsumer {
                 event.getRemarks(),
                 event.getEventId()
         );
+        acknowledgment.acknowledge();
     }
 }
