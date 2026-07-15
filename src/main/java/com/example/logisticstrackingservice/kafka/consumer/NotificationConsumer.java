@@ -41,8 +41,7 @@ public class NotificationConsumer {
             acknowledgment.acknowledge();
             return;
         }
-        Consignment consignment = consignmentRepository.findById(event.getConsignmentId())
-                .orElse(null);
+        Consignment consignment = consignmentRepository.findByIdWithReceiver(event.getConsignmentId()).orElse(null);
         if (consignment == null) {
             log.warn("[notification-consumer] consignment {} not found, skipping notification",
                     event.getConsignmentId());
