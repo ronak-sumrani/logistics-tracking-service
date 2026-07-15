@@ -21,6 +21,11 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<CustomerResponse> findOrCreateCustomer(@Valid @RequestBody CreateCustomerRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(customerService.findOrCreateAndReturn(request.getName(), request.getMobile()));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(customerService.findOrCreateAndReturn(
+                        request.getName(),
+                        request.getMobile(),
+                        request.getPreferredChannels()
+                ));
     }
 }

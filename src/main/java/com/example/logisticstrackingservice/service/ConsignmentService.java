@@ -60,8 +60,8 @@ public class ConsignmentService {
     @Auditable(action = AuditAction.SHIPMENT_CREATED)
     @Transactional
     public ConsignmentResponse createConsignment(CreateConsignmentRequest request) {
-        Customer sender = customerService.findOrCreate(request.getSenderName(), request.getSenderMobile());
-        Customer receiver = customerService.findOrCreate(request.getReceiverName(), request.getReceiverMobile());
+        Customer sender = customerService.findOrCreate(request.getSenderName(), request.getSenderMobile(), null);
+        Customer receiver = customerService.findOrCreate(request.getReceiverName(), request.getReceiverMobile(), null);
         String consignmentNumber = "CN-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         Consignment consignment = consignmentMapper.toEntity(request, sender, receiver, consignmentNumber);
         Consignment saved = consignmentRepository.save(consignment);

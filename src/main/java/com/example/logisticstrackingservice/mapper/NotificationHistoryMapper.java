@@ -11,13 +11,14 @@ import org.springframework.stereotype.Component;
 public class NotificationHistoryMapper {
 
     public NotificationHistory toEntity(NotificationDto dto, Consignment consignment,
-                                        ConsignmentStatus consignmentStatus, String eventId) {
+                                        ConsignmentStatus consignmentStatus, String eventId,
+                                        NotificationStatus notificationStatus) {
         NotificationHistory history = new NotificationHistory();
         history.setConsignment(consignment);
         history.setChannel(dto.getChannel());
         history.setMessage(dto.getMessage());
         history.setConsignmentStatus(consignmentStatus);
-        history.setNotificationStatus(NotificationStatus.SENT);
+        history.setNotificationStatus(notificationStatus);
         history.setEventId(eventId);
         return history;
     }

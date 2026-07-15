@@ -12,6 +12,7 @@ public class CustomerMapper {
         response.setId(customer.getId());
         response.setName(customer.getName());
         response.setMobile(customer.getMobile());
+        response.setPreferredChannels(customer.getPreferredChannels());
         return response;
     }
 }
