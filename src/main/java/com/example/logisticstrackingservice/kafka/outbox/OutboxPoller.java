@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+
 import java.util.List;
 
 @Slf4j
@@ -17,6 +18,7 @@ public class OutboxPoller {
     private final OutboxEventProcessor outboxEventProcessor;
 
     // NO @Transactional annotations here whatsoever
+    //@Transactional
     @Scheduled(fixedDelay = 2000)
     public void publishPendingEvents() {
         List<Long> pendingIds = outboxEventRepository.findPendingEventIds();
