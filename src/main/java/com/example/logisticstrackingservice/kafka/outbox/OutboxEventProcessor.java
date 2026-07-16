@@ -22,10 +22,10 @@ public class OutboxEventProcessor {
 
     // This creates an isolated Read-Write transaction for EVERY individual event
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void processAndPublish(Long eventId) {
+    public void processAndPublish(Long id) {
 
         // 1. Fetch the full entity (safely reads the OID and gets the row lock)
-        OutboxEvent outboxEvent = outboxEventRepository.findById(eventId).orElse(null);
+        OutboxEvent outboxEvent = outboxEventRepository.findByIdAndPublishedFalseWithLock(id).orElse(null);
 
         // Safety check in case another node processed it a millisecond ago
         if (outboxEvent == null || outboxEvent.isPublished()) {
